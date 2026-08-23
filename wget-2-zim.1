@@ -1,0 +1,178 @@
+.\" License: GPLv3
+.\" Author:  Ballerburg9005
+.\" Website: https://github.com/ballerburg9005/wget-2-zim
+.\"
+.TH WGET\-2\-ZIM 1 2026\-08\-22
+.\"
+.SH NAME
+wget\-2\-zim \- create ZIM files for Kiwix from arbitrary websites
+.\"
+.SH SYNOPSIS
+.nf
+.BR wget\-2\-zim\&.sh " [options] <url>"
+.BR wget\-2\-zim\&.sh " \-\-help"
+.fi
+.\"
+.SH DESCRIPTION
+Wget\-2\-zim is a simple
+.BR bash (1)
+script with some nifty tricks that can be used to archive websites on the Internet\&.
+It does not require ServiceWorkers and will drop a ZIM file that can be read with any Kiwix reader anywhere\&.
+The script does several things far beyond what
+.BR wget (1)
+alone would do\[em]it deletes large files,
+grabs embedded images and media files from external URLs,
+injects anti-cookie-banner CSS,
+and all sorts of other useful things\&.
+.PP
+Please note that
+.BR wget (1)
+has very limited ability to deal with Javascript,
+which may cause rendering issues with some pages\&.
+.UR https://zimit\&.kiwix\&.org
+Zimit
+.UE
+is an alternative that uses the Web ARChive standard,
+but it requires ServiceWorkers, which, as of 2022,
+do not work with kiwix-desktop (only kiwix-android and kiwix-serve)\&.
+.PP
+.B wget\-2\-zim
+tries to include as much as sanely possible (like PDFs, XLSs, music, and video) in the ZIM by default\&.
+.\"
+.SH OPTIONS
+.SS
+.B Download Options
+.TP
+.BR \-\-any\-max \ \fI<size_MB>\fR
+Maximum file size over which any files will be deleted\&.
+Default is "128" megabytes\&.
+.TP
+.BR \-\-not\-media\-max \ \fI<size_MB>\fR
+Maximum size for non-media files (e\&.g\&., music, \&.pdf, \&.xls)\&.
+Default is "2" megabytes\&.
+.TP
+.BR \-\-picture\-max \ \fI<size_MB>\fR
+Maximum size for picture files\&.
+Default is unset\&.
+.TP
+.BR \-\-document\-max \ \fI<size_MB>\fR
+Maximum size for document files (e\&.g\&., \&.epub, \&.pdf, \&.xls, \&.ods)\&.
+Default is unset\&.
+.TP
+.BR \-\-music\-max \ \fI<size_MB>\fR
+Maximum size for music files\&.
+Default is unset\&.
+.TP
+.BR \-\-video\-max \ \fI<size_MB>\fR
+Maximum size for video files\&.
+Default is unset\&.
+.TP
+.BR \-\-wget\-depth \ \fI<number>\fR
+Maximum recursion depth\&.
+Use 1 or 3 for shallow copies\&.
+Default is "7"\&.
+.TP
+.BR \-\-include\-zip
+Exclude archives (e\&.g\&., \&.zip, \&.rar, \&.7z, \&.gz) from download\&.
+.TP
+.BR \-\-include\-exe
+Exclude program files (e\&.g\&., \&.exe, \&.msi, \&.deb, \&.rpm) from download\&.
+.TP
+.BR \-\-include\-any
+Download any file type\&.
+.TP
+.BR \-\-no\-overreach\-media
+Don't download media files from external domains\&.
+Supplying this flag may affect images which are directly visible on the page\&.
+.TP
+.BR \-\-overreach\-any
+Download any inlined content from external domains (from "src="/"href=")\&.
+.TP
+.BR \-\-turbo
+Disable download delays\&.
+Supplying this flag may result in missing files due to servers throttling your connection\&.
+.TP
+.BR \-\-skip\-download
+Skip the content-downloading step and use existing files from the working directory\&.
+.SS
+.B ZIM Options
+.TP
+.BR \-\-creator \ \fI<string>\fR
+Use a custom creator string for the ZIM file\&.
+Default is "https://github\&.com/ballerburg9005/wget\-2\-zim"\&.
+.TP
+.BR \-\-publisher \ \fI<string>\fR
+Use a custom publisher string for the ZIM file\&.
+Default is "wget\-2\-zim, a simple easy to use script that just works"\&.
+.TP
+.BR \-\-description \ \fI<string>\fR
+Use a custom description for the ZIM file\&.
+Default is extracted from page title\&.
+.TP
+.BR \-\-long\-description \ \fI<string>\fR
+Use a custom long description for the ZIM file\&.
+Default is $description + " (created by wget-2-zim)"\&.
+.TP
+.BR \-\-language \ \fI<code>\fR
+Specify an ISO 639-3 language code for the ZIM file\&.
+Default is "eng"\&.
+.TP
+.BR \-\-output \ \fI<name>\fR
+Choose a custom output filename\&.
+Default is the website's domain name\&.
+.TP
+.BR \-\-timestamp
+Add a timestamp of format "YYYYMMDD_hhmmss" to the ZIM filename\&.
+.SS
+.B Other Options
+.TP
+.BR \-\-working\-dir \ \fI<path>\fR
+Use a custom working directory\&.
+Default is the website's domain name\&.
+.TP
+.BR \-\-help
+Print a help message and exit\&.
+.\"
+.SH PARAMETERS
+.TP
+<url>
+The URL from which to start scraping\&.
+Automatically-detected option values use this as well,
+treating it as the root of the source\&.
+.\"
+.SH EXIT STATUS
+.TP
+0
+Normal, error-free execution\&.
+.TP
+1
+Miscellaneous error\&.
+.\"
+.SH TROUBLESHOOTING
+.TP
+"convert: command not found"
+.TQ
+"zimwriterfs: command not found"
+Not all dependencies have been properly installed\&.
+Make sure ImageMagick and zim-tools are installed and accessible on your system\&.
+.TP
+"zimwriterfs: unrecognized option '*'"
+The version of zim-tools that is installed on your system is out of date\&.
+If you are using the latest version available to your package manager,
+you will need to uninstall and build it manually\&.
+.\"
+.SH CAVEATS
+The source website can throttle you if you download too much too fast, rendering your archive incomplete\&.
+You will notice this when you suddenly only get 404 errors, or when the script hangs often\&.
+There are delays inside the script in various places to prevent this\&.
+If you still experience throttling, it is probably due to total download volume over a certain time period (e\&.g\&., per day)\&.
+To solve this, you can try increasing the delays or pausing the script with CTRL+Z to continue at a later time using
+.BR fg (1p)\&.
+.PP
+Due to cookie-banner-removing CSS, some sites might not scroll or only show a blank box that you can't click away from\&.
+The solution is to modify or blank out "antishit" inside the script\&.
+This will, however, result in cookie banners and advertisements when they are present\&.
+.\"
+.SH SEE ALSO
+.BR bash (1),
+.BR wget (1)
