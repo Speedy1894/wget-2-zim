@@ -44,9 +44,14 @@ install -Dpm 0755 <(wget -q -O - 'https://raw.githubusercontent.com/ballerburg90
 ```
 <!-- These are `bash`, not `sh`, because `<()` process substitution isn't valid in the latter -->
 
-Optionally, install the `man` page.
+Optionally, install other documentation.
 ```bash
+# man page
 install -Dpm 0644 <(wget -q -O - 'https://raw.githubusercontent.com/ballerburg9005/wget-2-zim/main/wget-2-zim.1') /usr/local/share/man/man1/wget-2-zim.1
+
+# bash and zsh completion, respectively
+install -Dpm 0644 <(wget -q -O - 'https://raw.githubusercontent.com/ballerburg9005/wget-2-zim/main/completion/bash.bash') /usr/local/share/bash-completion/completions/wget-2-zim
+install -Dpm 0644 <(wget -q -O - 'https://raw.githubusercontent.com/ballerburg9005/wget-2-zim/main/completion/zsh.zsh') /usr/local/share/zsh/site-functions/_wget-2-zim
 ```
 
 
