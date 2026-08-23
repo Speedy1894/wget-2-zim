@@ -1,115 +1,140 @@
 <h1 align="center">
-  <img width=320 src="logo_400.png" alt="wget-2-zim logo">
+  <img width=320 src="logo_400.png" alt="The wget-2-zim logo: The Kiwix bird, a small tear falling from its eye, huddles facing the right over a circle about the size of its head. The text, wget 2 zim, is placed atop this from the top left to the bottom right, one word at a time.">
 </h1>
 
-# about
-Wget-2-zim is a simple bash script with some nifty tricks that can be used to archive websites on the internet. It does not require ServiceWorkers and will drop a [ZIM file](https://wiki.openzim.org/) that can be read with any [Kiwix](https://www.kiwix.org/en/) reader anywhere. The script does several things that go very much beyond what wget alone would do. For example it deletes large files and it grabs embedded images and media files from external URLs, it injects anti-cookie-banner CSS and all sorts of other useful things. 
+# `wget-2-zim` — create ZIM files for Kiwix from arbitrary websites
 
-Please note that wget has very very limited ability to deal with Javascript, which may cause rendering issues with some pages. [Zimit](https://github.com/openzim/zimit) is an alternative that uses the Web ARChive standard, but it does require ServiceWorkers, which currently (2022) does not work with Kiwix-Desktop (only kiwix-android and kiwix-serve).
+Wget-2-zim is a simple Bash script with some nifty tricks that can be used to archive websites on the Internet.
+It does not require ServiceWorkers and will drop a ZIM file that can be read with any Kiwix reader anywhere.
+The script does several things far beyond what Wget alone would do — it deletes large files,
+grabs embedded images and media files from external URLs,
+injects anti-cookie-banner CSS,
+and all sorts of other useful things.
 
-# how to use 
+Please note that Wget has very limited ability to deal with Javascript,
+which may cause rendering issues with some pages.
+[Zimit](https://zimit.kiwix.org) is an alternative that uses the Web ARChive standard,
+but it requires ServiceWorkers, which, as of 2022,
+do not work with kiwix-desktop (only kiwix-android and kiwix-serve).
 
-**First install those dependencies: wget, imagemagick, zim-tools**
 
-*(Beginners: read the "troubleshooting" section for possible command chain.)*
+## Installation
 
-Then run this command:
+First, install all dependencies.
+* [Wget](https://www.gnu.org/software/wget)
+* [ImageMagick](https://imagemagick.org)
+* [ZIM tools](https://github.com/openzim/zim-tools)
 
-> ./wget-2-zim.sh https://example.org
+(The following commands must be run as root or with `sudo`.)
+```sh
+# Debian / Ubuntu
+apt update
+apt install wget imagemagick zim-tools
 
-Now just open the ZIM file in Kiwix.
+# Red Hat / Fedora
+dnf install wget imagemagick zim-tools
 
-## options
-
+# Arch
+pacman -S wget imagemagick zim-tools
 ```
-./wget-2-zim.sh [OPTIONS] URL
+
+Then, install the executable file to the executable directory.
+```bash
+install -Dpm 0755 <(wget -q -O - 'https://raw.githubusercontent.com/ballerburg9005/wget-2-zim/main/wget-2-zim.sh') /usr/local/bin/wget-2-zim
+```
+<!-- These are `bash`, not `sh`, because `<()` process substitution isn't valid in the latter -->
+
+Optionally, install the `man` page.
+```bash
+install -Dpm 0644 <(wget -q -O - 'https://raw.githubusercontent.com/ballerburg9005/wget-2-zim/main/wget-2-zim.1') /usr/local/share/man/man1/wget-2-zim.1
 ```
 
-Makes ZIM file from URL with recursive wget and lots of tricks.
 
-wget-2-zim tries to make a bunch of smart decisions what to include in the ZIM, but it still tries to include as much as sanely possible (like PDFs, XLS files, music and video).
+## Usage
+
+```sh
+wget-2-zim [options] <url>
+
+# Print all command-line arguments and exit
+wget-2-zim --help
+
+# Create a ZIM holding the contents of example.org
+wget-2-zim https://example.org
+
+# Do the same as before, but without waiting for download delays
+wget-2-zim --turbo https://example.org
+
+# Do the same as the first time, but with custom metadata
+wget-2-zim https://example.org \
+--creator 'Me' \
+--description 'An example site reserved for documentation purposes' \
+--timestamp
+```
+
+Once it's created, just open the `.zim` file in a ZIM viewer like [Kiwix Desktop](https://github.com/kiwix/kiwix-desktop).
+
+
+## Options
+
+wget-2-zim tries to include as much as sanely possible (like PDFs, XLSs, music, and video) in the ZIM by default.
 
 | Option | Argument | Description | Default |
-|--------|----------|-------------|---------|
-| `--any-max` | SIZE_MB | Any file larger will be deleted before ZIM creation | 128MB |
-| `--not-media-max` | SIZE_MB | Max size for non-media files (not music, video, picture, epub, pdf, xls) | 2MB |
-| `--picture-max` | SIZE_MB | Max size for picture files | unset |
-| `--document-max` | SIZE_MB | Max size for documents (epub, pdf, xls, ods, etc.) | unset |
-| `--music-max` | SIZE_MB | Max size for music files | unset |
-| `--video-max` | SIZE_MB | Max size for video files | unset |
-| `--wget-depth` | NUMBER | Recursion depth (use 1 or 3 for shallow copies) | 7 |
-| `--include-zip` | | Include archives (zip, rar, 7z, gz, etc.) | |
-| `--include-exe` | | Include program files (exe, msi, deb, rpm, etc.) | |
+|---|---|---|---|
+| `--any-max` | size\_MB | Max file size over which any files will be deleted | `128` MB |
+| `--not-media-max` | size\_MB | Maximum size for non-media files (e.g., music, `.pdf`, `.xls`) | `2` MB |
+| `--picture-max` | size\_MB | Maximum size for picture files | unset |
+| `--document-max` | size\_MB | Maximum size for document files (e.g., `.epub`, `.pdf`, `.xls`, `.ods`) | unset |
+| `--music-max` | size\_MB | Maximum size for music files | unset |
+| `--video-max` | size\_MB | Maximum size for video files | unset |
+| `--wget-depth` | integer | Recursion depth (use 1 or 3 for shallow copies) | 7 |
+| `--include-zip` | | Exclude archives (e.g., `.zip`, `.rar`, `.7z`, `.gz`) from download | |
+| `--include-exe` | | Exclude program files (e.g., `.exe`, `.msi`, `.deb`, `.rpm`) from download | |
 | `--include-any` | | Download any file type | |
 | `--no-overreach-media` | | Don't download media files from external domains | |
-| `--overreach-any` | | Download any src=/href= content from external domains | |
+| `--overreach-any` | | Download any inlined content from external domains | |
 | `--turbo` | | Disable download delays (may result in missing files) | |
-| `--skip-download` | | Skip wget download step, use existing files in directory | |
-| `--creator` | STRING | Custom creator string for ZIM file | https://github.com/ballerburg9005/wget-2-zim |
-| `--publisher` | STRING | Custom publisher string for ZIM file | wget-2-zim, a simple easy to use script that just works |
-| `--description` | STRING | Custom description for ZIM file | extracted from page title |
-| `--long-description` | STRING | Custom long description for ZIM file | description + '(created by wget-2-zim)' |
-| `--language` | CODE | ISO 639-3 language code for ZIM file | eng |
-| `--output` | NAME | Custom output file name | domain name |
-| `--working-dir` | PATH | Custom working directory name | domain name |
-| `--timestamp` | | Add timestamp (YYYYMMDD_hhmmss) to ZIM file name | |
+| `--skip-download` | | Skip download step; use existing files in directory | |
+| `--creator` | string | Custom creator string for ZIM file | "`https://github.com/ballerburg9005/wget-2-zim`" |
+| `--publisher` | string | Custom publisher string for ZIM file | "`wget-2-zim, a simple easy to use script that just works`" |
+| `--description` | string | Custom description for ZIM file | extracted from page title |
+| `--long-description` | string | Custom long description for ZIM file | description + "`(created by wget-2-zim)`" |
+| `--language` | code | ISO 639-3 language code for ZIM file | "`eng`" |
+| `--output` | name | Custom output filename | domain name |
+| `--timestamp` | | Add timestamp (`YYYYMMDD_hhmmss`) to ZIM filename | |
+| `--working-dir` | path | Custom working directory | "`./`" + domain name |
 
-# running under Windows
 
-[Please do not run Windows](https://ballerburg.us.to/about-your-obligation-to-boycott-windows-11/). However if you really must, then there are basically two easy methods to do it: 
+## Running Under Windows
 
-1. [WSL2](https://docs.microsoft.com/en-us/windows/wsl/setup/environment) (fairly easy) - integrated Linux environment from Microsoft, more similar to a virtual machine (runs Linux binaries)
-2. [MSYS2](https://www.msys2.org/) Great tool, but NOT VIABLE ANYMORE FOR ZIM-TOOLS! Don't try.
+[Please do not use Windows](https://ballerburg.us.to/about-your-obligation-to-boycott-windows-11).
+However, if you must, then there's basically one option:
 
-## WSL2 
+1. [WSL2](https://docs.microsoft.com/en-us/windows/wsl/setup/environment) — integrated Linux environment from Microsoft; similar to a virtual machine (runs Linux binaries)
 
-Follow one of the many [tutorials](https://www.youtube.com/watch?v=pOZ5Pb4pHOY) to set up WSL2 on Windows. Make sure to use the latest image of Ubuntu and not Debian (or other distributions which might have severely outdated packages).
+    Follow one of the many [tutorials](https://www.youtube.com/watch?v=pOZ5Pb4pHOY) to set up WSL2.
+    Then, follow the instructions under "Installation"
 
-Then follow the steps in section "running on Ubuntu".
+1. [MSYS2](https://www.msys2.org/) — great tool, but **NOT VIABLE ANYMORE FOR `zim-tools`**! Don't try.
 
-# running on Ubuntu
 
-```bash
-sudo apt update
-sudo apt install wget imagemagick git zim-tools
-git clone https://github.com/ballerburg9005/wget-2-zim
-./wget-2-zim/wget-2-zim.sh https://example.org
-```
+## Troubleshooting
 
-# troubleshooting for beginners
+* If you get an error ending in "`command not found`," you are missing one or more dependencies.
+See the "Installation" section for instructions on installing them.
 
-If you get the error "convert: command not found" or "zimwriterfs: command not found" it means that you did not install the necessary dependencies as instructed in the "how to use" section. 
+* If you get an error from `zimwriterfs` about an option being unknown, you are using an outdated version of `zim-tools`.
+If you are using the latest version available to your package manager, you will be need to uninstall and build it manually.
+Detailed build instructions can be found in its [source repository](https://github.com/openzim/zim-tools).
 
-If you look at the steps 1-3 in "running on Ubuntu" section, you can see what the exact commands for a proper installation should look like. However, you have to understand that the first ans second step (#1, #2) will only work on Ubuntu and Debian-alike systems, since "apt" is a specific package manager, and it differs between Linux distributions. Thus please adapt step #1 and #2 appropriately.
 
-Another problem that might happen is, that zimwriterfs complains about "--illustration" option being unknown (or some other option). This is because you are using an outdated version of zim-tools. Please uninstall it and build zim-tools by hand. 
+## Known Issues
 
-## building zim-tools by hand (not recommended) in Ubuntu
+* The source website can throttle you if you download too much too fast, rendering your archive incomplete.
+You will notice this when you suddenly only get 404 errors, or when the script hangs often.
+There are delays inside the script in various places to prevent this.
+If you still experience throttling, it is probably due to total download volume over a certain time period (e.g., per day).
+To solve this, you can try increasing the delays or pausing the script with CTRL+Z to continue at a later time using `fg`.
 
-```
-sudo bash
-apt install meson ninja-build build-essential cmake pkg-config autoconf automake libtool liblzma-dev lzma libzstd-dev xapian-tools libxapian-dev libicu-dev libgtest-dev libdocopt-dev zlib1g-dev libgumbo-dev libmagic-dev 
-cd ~/
-git clone https://github.com/kainjow/Mustache
-cp Mustache/mustache.hpp /usr/include/
-git clone https://github.com/openzim/libzim
-cd libzim; meson setup build -Dwerror=false; ninja -C build; ninja -C build install; cd ~/
-git clone https://github.com/openzim/zim-tools
-cd zim-tools; meson setup build -Dwerror=false; ninja -C build; ninja -C build install; cd ~/
-git clone https://github.com/openzim/zimwriterfs
-cd zimwriterfs; meson setup build -Dwerror=false; ninja -C build; ninja -C build install; cd ~/
-```
-
-For poor environments:
-```
-# fixes error libzim.so.9 not found
-echo "/usr/local/lib" | tee /etc/ld.so.conf.d/local.conf
-ldconfig
-# potentially fixes error zimwriterfs not found (edit /etc/environment for permanent solution)
-export PATH="/usr/local/sbin:/usr/local/bin:$PATH"
-```
-
-# known issues
-
-* The website can throttle you if you download too much too fast, rendering your archive incomplete. You will notice this when you suddenly only get 404 errors, or when it just hangs a lot. There are already (very necessary) delays inside the script in various places to prevent this. If you still experience throttling, it is probably due to total download volume per 24 hours. You could try making the delays even bigger, or you could try pausing the script with CTRL + Z in between, and continue it the next day or some time later with "fg" bit by bit.
-* Due to cookie banner removing CSS, some sites might not scroll or only show a blank box that you can't click away. The solution is to modify or blank out "antishit" inside the script. This will however result in cookie banners showing on every page, and also ads if present.
+* Due to cookie-banner-removing CSS, some sites might not scroll or only show a blank box that you can't click away from.
+The solution is to modify or blank out "antishit" inside the script.
+This will, however, result in cookie banners and advertisements when they are present.
