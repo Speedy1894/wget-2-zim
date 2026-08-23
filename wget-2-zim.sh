@@ -9,89 +9,39 @@ WGETREJECT='*.img,*.md*,*.dsk,*.nrg,*.iso,*.cue,*.pk*,*.pk0,*.pk1,*.pk2,*.pk3,*.
 WGETREJECT_ARCHIVE=',*.lz,*.gz,*.zip,*.rar,*.7z,*.tar*,*.xz,*.bz2'
 WGETREJECT_PROGRAM=',*.exe,*.deb,*.rpm,*.dmg,*.bin,*.msi,*.apk,*.tar.*z'
 
+# Print help message
 if [[ " --help -help -h " =~ " $1 " || "$1" == "" ]]; then
-	echo "  $0 [OPTIONS] URL"
-	echo "  Makes ZIM file from URL with recursive wget and lots of tricks."
-	echo ""
-	echo "  wget-2-zim tries to make a bunch of smart decisions what to include"
-	echo "  in the ZIM, but it still tries to include as much as sanely possible"
-	echo "  (like PDFs, XLS files, music and video)."
-	echo ""
-	echo "OPTIONS:"
-	echo "  --any-max [SIZE_MB]"
-	echo "      Any file larger will be deleted before ZIM creation."
-	echo "      Default: 128MB"
-	echo ""
-	echo "  --not-media-max [SIZE_MB]"
-	echo "      Max size for non-media files (not music, video, picture, epub,"
-	echo "      pdf, xls). Default: 2MB"
-	echo ""
-	echo "  --picture-max [SIZE_MB]"
-	echo "      Max size for picture files. Default: unset"
-	echo ""
-	echo "  --document-max [SIZE_MB]"
-	echo "      Max size for documents (epub, pdf, xls, ods, etc.). Default: unset"
-	echo ""
-	echo "  --music-max [SIZE_MB]"
-	echo "      Max size for music files. Default: unset"
-	echo ""
-	echo "  --video-max [SIZE_MB]"
-	echo "      Max size for video files. Default: unset"
-	echo ""
-	echo "  --wget-depth [NUMBER]"
-	echo "      Recursion depth (use 1 or 3 for shallow copies). Default: 7"
-	echo ""
-	echo "  --include-zip"
-	echo "      Include archives (zip, rar, 7z, gz, etc.)."
-	echo ""
-	echo "  --include-exe"
-	echo "      Include program files (exe, msi, deb, rpm, etc.)."
-	echo ""
-	echo "  --include-any"
-	echo "      Download any file type."
-	echo ""
-	echo "  --no-overreach-media"
-	echo "      Don't download media files from external domains (may affect"
-	echo "      images directly visible on the page)."
-	echo ""
-	echo "  --overreach-any"
-	echo "      Download any src=/href= content from external domains."
-	echo ""
-	echo "  --turbo"
-	echo "      Disable download delays (may result in missing files due to"
-	echo "      throttling with false 404s)."
-	echo ""
-	echo "  --skip-download"
-	echo "      Skip wget download step, use existing files in domain directory."
-	echo ""
-	echo "  --creator [STRING]"
-	echo "      Custom creator string for ZIM file."
-	echo "      Default: https://github.com/ballerburg9005/wget-2-zim"
-	echo ""
-	echo "  --publisher [STRING]"
-	echo "      Custom publisher string for ZIM file."
-	echo "      Default: wget-2-zim, a simple easy to use script that just works"
-	echo ""
-	echo "  --description [STRING]"
-	echo "      Custom description for ZIM file."
-	echo "      Default: extracted from page title"
-	echo ""
-	echo "  --long-description [STRING]"
-	echo "      Custom long description for ZIM file."
-	echo "      Default: description + '(created by wget-2-zim)'"
-	echo ""
-	echo "  --language [CODE]"
-	echo "      ISO 639-3 language code for ZIM file. Default: eng"
-	echo ""
-	echo "  --output [NAME]"
-	echo "      Custom output file name. Default: domain name"
-	echo ""
-	echo "  --working-dir [PATH]"
-	echo "      Custom working directory name. Default: domain name"
-	echo ""
-	echo "  --timestamp"
-	echo "      Add timestamp (YYYYMMDD_hhmmss) to ZIM file name."
-	exit -1
+    echo -n "usage:  ${ basename "$0";}"
+    cat <<"EOF"
+ [options] <url>
+download options:
+  --any-max <size_MB>       Max file size, over which any files will be deleted
+  --not-media-max <size_MB> Non-media file (e.g., music, pdf, xls) max size
+  --picture-max <size_MB>   Picture file max size
+  --document-max <size_MB>  Document file (e.g., epub, pdf, xls, ods) max size
+  --music-max <size_MB>     Music file max size
+  --video-max <size_MB>     Video file max size
+  --wget-depth <number>     Recursion depth (use 1 or 3 for shallow copies)
+  --include-zip             Exclude archives (e.g., zip, rar, 7z, gz)
+  --include-exe             Exclude program files (e.g., exe, msi, deb, rpm)
+  --include-any             Download any file type
+  --no-overreach-media      Don't download media files from external domains
+  --overreach-any           Download any inlined content from external domains
+  --turbo                   Disable download delays (may result in missing files)
+  --skip-download           Skip downloading step; use existing files
+ZIM options:
+  --creator <string>          Custom creator string
+  --publisher <string>        Custom publisher string
+  --description <string>      Custom description
+  --long-description <string> Custom long description
+  --language <code>           ISO 639-3 language code
+  --output <name>             Custom output filename
+  --timestamp                 Add timestamp (YYYYMMDD_hhmmss) to ZIM filename
+other options:
+  --working-dir <path> Custom working directory
+  --help               Print this help message and exit
+EOF
+	exit 0  # Code 0 since the user asked for it
 fi
 
 echo ""
